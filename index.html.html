@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAIs — agendamento por WhatsApp | AiD Negócios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noite:#120E26; --violeta:#7B5CFF; --azul:#2BB3FF;
+    --osso:#EDE9F5; --osso-fraco:#9B92B8;
+    --zap-fundo:#0B141A; --zap-header:#1F2C33; --zap-bolha-dela:#1F2C33;
+    --zap-bolha-voce:#005C4B; --zap-texto:#E9EDEF; --zap-hora:#8696A0;
+    --borda:rgba(123,92,255,.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--noite);
+    background-image:
+      radial-gradient(900px 500px at 78% -10%, rgba(43,179,255,.13), transparent 60%),
+      radial-gradient(700px 500px at 12% 8%, rgba(123,92,255,.16), transparent 62%);
+    color:var(--osso);font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;min-height:100vh;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:44px 22px 72px}
+
+  .marca{display:inline-flex;align-items:center;gap:9px;font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--osso-fraco);
+    font-weight:600;margin-bottom:26px}
+  .marca i{width:7px;height:7px;border-radius:50%;background:var(--violeta);
+    box-shadow:0 0 0 4px rgba(123,92,255,.18);font-style:normal}
+
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:clamp(2.1rem,5.4vw,3.9rem);line-height:1.02;
+    letter-spacing:-.025em;max-width:16ch}
+  h1 em{font-style:normal;color:var(--azul)}
+  .sub{color:var(--osso-fraco);font-size:clamp(1rem,1.7vw,1.12rem);
+    max-width:46ch;margin-top:18px}
+
+  .crono{display:inline-flex;align-items:baseline;gap:10px;margin-top:26px;
+    padding:9px 17px;border:1px solid var(--borda);border-radius:100px;
+    background:rgba(123,92,255,.07);transition:opacity .4s}
+  .crono.some{opacity:0;pointer-events:none}
+  .crono b{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:1.45rem;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .crono span{font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;
+    color:var(--osso-fraco);font-weight:600}
+  .crono.parado b{color:var(--azul)}
+
+  .palco{display:grid;grid-template-columns:minmax(0,376px) minmax(0,1fr);
+    gap:52px;align-items:start;margin-top:52px}
+
+  .fone{border:1px solid rgba(255,255,255,.09);border-radius:26px;
+    background:var(--zap-fundo);overflow:hidden;
+    box-shadow:0 30px 70px -22px rgba(0,0,0,.75),0 0 0 1px rgba(123,92,255,.1)}
+  .fone header{background:var(--zap-header);padding:13px 15px;
+    display:flex;align-items:center;gap:11px}
+  .ava{width:38px;height:38px;border-radius:50%;flex:none;
+    background:linear-gradient(140deg,var(--violeta),var(--azul));
+    display:grid;place-items:center;font-family:'Bricolage Grotesque',sans-serif;
+    font-weight:800;font-size:14px;color:#fff;letter-spacing:-.01em}
+  .quem{min-width:0}
+  .quem b{display:block;font-size:14.5px;color:var(--zap-texto);font-weight:600}
+  .quem small{font-size:11.5px;color:#9FE8B4;display:flex;align-items:center;gap:5px}
+  .quem small::before{content:"";width:6px;height:6px;border-radius:50%;background:#25D366}
+
+  .fio{height:466px;overflow-y:auto;padding:18px 15px 8px;display:flex;
+    flex-direction:column;gap:8px;scroll-behavior:smooth;
+    background-image:radial-gradient(circle at 25% 15%,rgba(123,92,255,.045),transparent 55%)}
+  .fio::-webkit-scrollbar{width:5px}
+  .fio::-webkit-scrollbar-thumb{background:rgba(255,255,255,.11);border-radius:4px}
+
+  .msg{max-width:84%;padding:7px 11px 6px;border-radius:9px;font-size:14.2px;
+    color:var(--zap-texto);animation:sobe .26s ease-out;word-wrap:break-word}
+  @keyframes sobe{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+  .dela{background:var(--zap-bolha-dela);align-self:flex-start;border-top-left-radius:3px}
+  .voce{background:var(--zap-bolha-voce);align-self:flex-end;border-top-right-radius:3px}
+  .msg time{display:block;text-align:right;font-size:10.5px;color:var(--zap-hora);
+    margin-top:2px;font-variant-numeric:tabular-nums}
+  .voce time{color:rgba(233,237,239,.55)}
+
+  .marco{align-self:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--azul);background:rgba(43,179,255,.1);border:1px solid rgba(43,179,255,.25);
+    padding:5px 13px;border-radius:100px;margin:10px 0;font-weight:600;
+    animation:sobe .3s ease-out}
+
+  .recibo{background:#111B21;border:1px solid rgba(155,146,184,.2);border-radius:9px;
+    padding:13px;max-width:84%;align-self:flex-start;animation:sobe .3s ease-out}
+  .recibo h4{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:800;
+    letter-spacing:.13em;text-transform:uppercase;color:var(--azul);margin-bottom:9px}
+  .recibo dl{display:grid;grid-template-columns:auto 1fr;gap:5px 13px;font-size:13px}
+  .recibo dt{color:var(--zap-hora)}
+  .recibo dd{color:var(--zap-texto);font-weight:500;text-align:right}
+
+  .digita{background:var(--zap-bolha-dela);align-self:flex-start;padding:11px 13px;
+    border-radius:9px;border-top-left-radius:3px;display:flex;gap:4px;animation:sobe .2s ease-out}
+  .digita i{width:6px;height:6px;border-radius:50%;background:var(--zap-hora);
+    animation:pisca 1.25s infinite;font-style:normal}
+  .digita i:nth-child(2){animation-delay:.18s}
+  .digita i:nth-child(3){animation-delay:.36s}
+  @keyframes pisca{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+  .barra{background:var(--zap-header);padding:11px 13px;min-height:62px;
+    display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .chip{font-family:'Inter',sans-serif;font-size:13.2px;font-weight:500;padding:8px 14px;
+    border-radius:100px;cursor:pointer;background:rgba(43,179,255,.1);color:#8FD6FF;
+    border:1px solid rgba(43,179,255,.32);transition:background .15s,transform .15s}
+  .chip:hover{background:rgba(43,179,255,.2)}
+  .chip:active{transform:scale(.97)}
+  .chip:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+  .chip.fraco{background:transparent;color:var(--zap-hora);border-color:rgba(134,150,160,.35)}
+  .chip.fraco:hover{background:rgba(134,150,160,.12)}
+  .chip.forte{background:#25D366;color:#0B141A;border-color:#25D366;font-weight:600}
+  .chip.forte:hover{background:#3ee07a}
+
+  .campo{display:flex;gap:7px;width:100%}
+  .campo input{flex:1;min-width:0;background:#2A3942;border:1px solid transparent;
+    border-radius:100px;padding:9px 15px;color:var(--zap-texto);
+    font-family:'Inter',sans-serif;font-size:14px}
+  .campo input:focus{outline:none;border-color:var(--azul)}
+  .campo button{flex:none;width:38px;height:38px;border-radius:50%;border:none;
+    cursor:pointer;background:#25D366;color:#0B141A;font-size:17px;line-height:1}
+  .campo button:focus-visible{outline:2px solid var(--osso);outline-offset:2px}
+  .dica{font-size:12px;color:var(--zap-hora);width:100%}
+
+  .painel h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:1.32rem;letter-spacing:-.015em;margin-bottom:5px}
+  .painel > p.intro{color:var(--osso-fraco);font-size:14.2px;margin-bottom:26px;max-width:42ch}
+  .nota{border-left:2px solid rgba(123,92,255,.2);padding:0 0 0 20px;margin-bottom:24px;
+    opacity:.24;filter:blur(.4px);transition:opacity .5s,border-color .5s,filter .5s}
+  .nota.on{opacity:1;filter:none;border-left-color:var(--violeta)}
+  .nota b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:1.02rem;margin-bottom:3px;letter-spacing:-.01em}
+  .nota p{color:var(--osso-fraco);font-size:14px;max-width:44ch}
+
+  .fecho{margin-top:34px;padding:26px;border-radius:16px;border:1px solid var(--borda);
+    background:rgba(123,92,255,.06);opacity:0;transform:translateY(12px);
+    pointer-events:none;transition:opacity .55s,transform .55s}
+  .fecho.on{opacity:1;transform:none;pointer-events:auto}
+  .fecho b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:1.28rem;letter-spacing:-.015em;margin-bottom:7px}
+  .fecho p{color:var(--osso-fraco);font-size:14.2px;max-width:44ch}
+  .acoes{display:flex;flex-wrap:wrap;gap:11px;margin-top:20px}
+  .btn{font-family:'Inter',sans-serif;font-size:14.2px;font-weight:600;padding:12px 22px;
+    border-radius:100px;cursor:pointer;text-decoration:none;display:inline-block;
+    border:1px solid transparent;transition:transform .15s,background .15s}
+  .btn:active{transform:scale(.98)}
+  .btn:focus-visible{outline:2px solid var(--azul);outline-offset:3px}
+  .btn-1{background:var(--violeta);color:#fff}
+  .btn-1:hover{background:#8C71FF}
+  .btn-2{background:transparent;color:var(--osso);border-color:rgba(237,233,245,.24)}
+  .btn-2:hover{background:rgba(237,233,245,.06)}
+  .btn-zap{background:#25D366;color:#0B141A}
+  .btn-zap:hover{background:#3ee07a}
+
+  .rodape{margin-top:60px;padding-top:22px;border-top:1px solid rgba(255,255,255,.07);
+    font-size:12.2px;color:var(--osso-fraco);display:flex;justify-content:space-between;
+    gap:14px;flex-wrap:wrap}
+
+  @media (max-width:860px){
+    .palco{grid-template-columns:1fr;gap:40px}
+    .fone{max-width:376px;margin:0 auto}
+    .fio{height:410px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+    .fio{scroll-behavior:auto}
+    .nota{opacity:1;filter:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="marca"><i></i>AiD Negócios</div>
+  <h1>Sua secretária dorme.<br><em>A LAIs não.</em></h1>
+  <p class="sub">Este é o WhatsApp da sua clínica às 21h47 de um domingo. Um paciente acabou de mandar mensagem. Continue a conversa e veja o que acontece.</p>
+
+  <div class="crono" id="crono">
+    <b id="relogio">0,0s</b><span id="rotulo">desde a primeira mensagem</span>
+  </div>
+
+  <div class="palco">
+    <div class="fone">
+      <header>
+        <div class="ava" id="ava">L</div>
+        <div class="quem">
+          <b id="nome-contato">Clínica Bem Viver</b>
+          <small>online</small>
+        </div>
+      </header>
+      <div class="fio" id="fio" role="log" aria-live="polite" aria-label="Conversa"></div>
+      <div class="barra" id="barra"></div>
+    </div>
+
+    <div class="painel" id="painel">
+      <h2 id="painel-h">O que acabou de acontecer</h2>
+      <p class="intro" id="painel-p">Cada passo dessa conversa resolve um problema que hoje custa dinheiro à clínica.</p>
+
+      <div id="notas">
+        <div class="nota" id="n0">
+          <b>Respondeu em 2 segundos, num domingo à noite</b>
+          <p>Fora do horário comercial, a mensagem sem resposta vira ligação pra concorrente. A maioria dos pacientes procura atendimento justamente quando a clínica está fechada.</p>
+        </div>
+        <div class="nota" id="n1">
+          <b>Ofereceu só horário que existe de verdade</b>
+          <p>Conectada à agenda, a LAIs nunca oferece um horário já ocupado. Acaba a remarcação constrangedora do dia seguinte.</p>
+        </div>
+        <div class="nota" id="n2">
+          <b>Fechou sem ninguém digitar nada</b>
+          <p>Nenhuma recepcionista foi interrompida. O agendamento entrou na agenda sozinho, com os dados já certos.</p>
+        </div>
+        <div class="nota" id="n3">
+          <b>Agendou o lembrete de 24h</b>
+          <p>É aqui que o dinheiro aparece. Lembrete automático é o que derruba a falta sem aviso — a maior perda silenciosa de qualquer clínica pequena.</p>
+        </div>
+      </div>
+
+      <div class="fecho" id="fecho">
+        <b id="fecho-b">Foi isso que seu paciente sentiu.</b>
+        <p id="fecho-p">Sem menu de opções, sem “digite 1”, sem esperar o horário comercial. Quer ver funcionando no seu negócio? A própria LAIs marca a conversa.</p>
+        <div class="acoes" id="fecho-acoes">
+          <button class="btn btn-1" id="btn-marcar">Marcar 20 minutos com a AiD</button>
+          <button class="btn btn-2" id="btn-de-novo">Ver de novo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rodape">
+    <span id="rodape-1">Demonstração. Clínica e horários fictícios.</span>
+    <span>AiD Negócios · automação de atendimento</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     CONFIGURACAO -- edite so esta parte
+     ========================================================= */
+
+  var CONFIG = {
+
+    // WhatsApp: pais + DDD + numero, so digitos
+    telefone: "5527988539444",
+
+    // Sua agenda real. 0=domingo ... 6=sabado.
+    // Cada par e uma janela ["inicio","fim"] em 24h.
+    // Dia sem janela = fechado.
+    agenda: {
+      0: [],                                    // domingo
+      1: [["07:00","09:00"],["12:00","14:00"]], // segunda
+      2: [["12:00","14:00"],["17:00","19:00"]], // terca
+      3: [["07:00","09:00"],["17:00","19:00"]], // quarta
+      4: [["12:00","14:00"]],                   // quinta
+      5: [["07:00","09:00"]],                   // sexta
+      6: []                                     // sabado
+    },
+
+    duracaoMin:       20,  // duracao da reuniao
+    passoMin:         60,  // de quanto em quanto tempo abre um horario
+    antecedenciaHoras: 3,  // so oferece horario com pelo menos X h de antecedencia
+    diasMostrados:     3,  // quantos dias com vaga aparecem por vez
+
+    negocios: ["Clínica", "Consultório", "Estúdio / bem-estar", "Outro"]
+  };
+
+  /* ========================================================= */
+
+  var DIA_CURTO = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  var DIA_LONGO = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+
+  var fio=document.getElementById('fio'), barra=document.getElementById('barra'),
+      fecho=document.getElementById('fecho'), relogio=document.getElementById('relogio'),
+      crono=document.getElementById('crono'), rotulo=document.getElementById('rotulo'),
+      notas=document.getElementById('notas'), painelH=document.getElementById('painel-h'),
+      painelP=document.getElementById('painel-p'), fechoB=document.getElementById('fecho-b'),
+      fechoP=document.getElementById('fecho-p'), acoes=document.getElementById('fecho-acoes'),
+      contato=document.getElementById('nome-contato'), ava=document.getElementById('ava'),
+      rodape1=document.getElementById('rodape-1');
+
+  var t0=null,tick=null,nome='',hi=0;
+  var escolha={servico:'',prof:'',quando:''};
+  var lead={horario:'',negocio:'',nome:''};
+  var diaEscolhido=null;
+
+  var HORA=['21:47','21:47','21:48','21:48','21:49','21:49','21:50','21:50','21:51','21:51'];
+  function hora(){ return HORA[Math.min(hi++,HORA.length-1)]; }
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function desce(){fio.scrollTop=fio.scrollHeight;}
+  function pad(n){return (n<10?'0':'')+n;}
+
+  /* ---------- motor de agenda ---------- */
+
+  function paraMin(hhmm){var p=hhmm.split(':');return (+p[0])*60 + (+p[1]);}
+  function deMin(m){return pad(Math.floor(m/60))+':'+pad(m%60);}
+
+  function slotsDoDia(dia){
+    var janelas = CONFIG.agenda[dia.getDay()] || [];
+    var limite = new Date(Date.now() + CONFIG.antecedenciaHoras*3600000);
+    var out = [];
+    janelas.forEach(function(j){
+      var ini = paraMin(j[0]), fim = paraMin(j[1]);
+      for (var m = ini; m + CONFIG.duracaoMin <= fim; m += CONFIG.passoMin){
+        var d = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(),
+                         Math.floor(m/60), m%60, 0, 0);
+        if (d > limite) out.push({ quando:d, rotulo:deMin(m) });
+      }
+    });
+    return out;
+  }
+
+  function proximosDias(n){
+    var out = [], hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    for (var i = 0; i < 28 && out.length < n; i++){
+      var dia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()+i);
+      var s = slotsDoDia(dia);
+      if (s.length) out.push({ dia:dia, slots:s });
+    }
+    return out;
+  }
+
+  function rotuloDia(dia){
+    var hoje = new Date(); hoje.setHours(0,0,0,0);
+    var diff = Math.round((dia - hoje)/86400000);
+    var base = diff === 0 ? 'Hoje' : (diff === 1 ? 'Amanhã' : DIA_CURTO[dia.getDay()]);
+    return base + ', ' + pad(dia.getDate()) + '/' + pad(dia.getMonth()+1);
+  }
+
+  function textoDia(dia){
+    return DIA_LONGO[dia.getDay()] + ', ' + pad(dia.getDate()) + '/' + pad(dia.getMonth()+1);
+  }
+
+  /* ---------- primitivas de conversa ---------- */
+
+  function bolha(t,q){var d=document.createElement('div');d.className='msg '+q;
+    d.innerHTML=esc(t).replace(/\n/g,'<br>')+'<time>'+hora()+'</time>';
+    fio.appendChild(d);desce();}
+
+  function marco(t){var d=document.createElement('div');d.className='marco';
+    d.textContent=t;fio.appendChild(d);desce();}
+
+  function digitando(){var d=document.createElement('div');d.className='digita';
+    d.innerHTML='<i></i><i></i><i></i>';fio.appendChild(d);desce();return d;}
+
+  function recibo(titulo,pares){
+    var d=document.createElement('div');d.className='recibo';
+    var html='<h4>'+esc(titulo)+'</h4><dl>';
+    pares.forEach(function(p){html+='<dt>'+esc(p[0])+'</dt><dd>'+esc(p[1])+'</dd>';});
+    d.innerHTML=html+'</dl>';fio.appendChild(d);desce();
+  }
+
+  function revela(i){var e=document.getElementById('n'+i);if(e)e.classList.add('on');}
+  function limpa(){barra.innerHTML='';}
+
+  function chips(lista,cb){
+    limpa();
+    lista.forEach(function(item){
+      var txt   = typeof item === 'string' ? item : item.texto;
+      var estilo= typeof item === 'string' ? ''   : (item.estilo || '');
+      var valor = typeof item === 'string' ? item : (item.valor !== undefined ? item.valor : item.texto);
+      var b=document.createElement('button');
+      b.className='chip'+(estilo?' '+estilo:'');
+      b.type='button'; b.textContent=txt;
+      b.addEventListener('click',function(){limpa();cb(valor,txt);});
+      barra.appendChild(b);
+    });
+  }
+
+  function campo(placeholder,cb){
+    limpa();
+    var f=document.createElement('div');f.className='campo';
+    f.innerHTML='<input type="text" id="entrada" placeholder="'+placeholder+'" '+
+      'autocomplete="off" maxlength="40" aria-label="Resposta">'+
+      '<button type="button" id="enviar" aria-label="Enviar">&#10148;</button>';
+    barra.appendChild(f);
+    var dica=document.createElement('span');dica.className='dica';
+    dica.textContent='Agora é você quem digita.';barra.appendChild(dica);
+    var inp=document.getElementById('entrada');
+    function manda(){var v=inp.value.trim();if(!v){inp.focus();return;}limpa();cb(v);}
+    document.getElementById('enviar').addEventListener('click',manda);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')manda();});
+    setTimeout(function(){inp.focus();},120);
+  }
+
+  function fala(linhas,fim){
+    var i=0;
+    (function prox(){
+      if(i>=linhas.length){if(fim)fim();return;}
+      var d=digitando();
+      var espera=Math.min(1500,380+linhas[i].length*17);
+      setTimeout(function(){d.remove();bolha(linhas[i],'dela');i++;setTimeout(prox,260);},espera);
+    })();
+  }
+
+  function comecaCrono(){
+    if(t0)return;t0=Date.now();
+    tick=setInterval(function(){
+      relogio.textContent=((Date.now()-t0)/1000).toFixed(1).replace('.',',')+'s';
+    },100);
+  }
+  function paraCrono(){
+    clearInterval(tick);crono.classList.add('parado');
+    rotulo.textContent='do "oi" até o agendamento confirmado';
+  }
+
+  /* ================= ATO 1 -- a clinica ================= */
+
+  var PROF={'Fisioterapia':'Dra. Marina Alves','Nutrição':'Dr. Rafael Costa','Psicologia':'Dra. Helena Bastos'};
+
+  function a1(){
+    comecaCrono();
+    bolha('Oi, boa noite! Queria marcar uma consulta','voce');
+    setTimeout(function(){
+      fala(['Boa noite! Aqui é a LAIs, assistente da Clínica Bem Viver 💜',
+            'Posso marcar agora mesmo com você. Qual atendimento você procura?'],
+        function(){revela(0);chips(['Fisioterapia','Nutrição','Psicologia'],a2);});
+    },700);
+  }
+
+  function a2(s){
+    escolha.servico=s;escolha.prof=PROF[s];
+    bolha(s,'voce');
+    setTimeout(function(){
+      fala(['Ótimo. '+escolha.prof+' atende '+s.toLowerCase()+' e ainda tem horário essa semana.',
+            'Estes estão livres. Qual fica melhor pra você?'],
+        function(){revela(1);chips(['Terça, 14h','Quarta, 9h30','Quinta, 16h'],a3);});
+    },620);
+  }
+
+  function a3(q){
+    if(q.indexOf('Quarta')===0) escolha.quando='Quarta-feira, 9h30 · 13 de agosto';
+    else if(q.indexOf('Quinta')===0) escolha.quando='Quinta-feira, 16h · 14 de agosto';
+    else escolha.quando='Terça-feira, 14h · 12 de agosto';
+    bolha(q,'voce');
+    setTimeout(function(){
+      fala(['Reservei esse horário pra você por 10 minutos.',
+            'Só preciso do seu nome completo pra confirmar.'],
+        function(){campo('Digite seu nome…',a4);});
+    },620);
+  }
+
+  function a4(d){
+    nome=d;bolha(d,'voce');
+    var p=d.split(' ')[0];
+    setTimeout(function(){
+      fala(['Prontinho, '+p+'! Agendamento confirmado 🎉'],function(){
+        revela(2);
+        setTimeout(function(){
+          recibo('Comprovante de agendamento',[
+            ['Paciente',nome],['Atendimento',escolha.servico],
+            ['Profissional',escolha.prof],['Data',escolha.quando],
+            ['Endereço','Av. Nossa Senhora, 120']
+          ]);
+          setTimeout(function(){
+            fala(['Vou te mandar um lembrete 24h antes.',
+                  'Se precisar remarcar ou cancelar, é só me chamar aqui — respondo na hora, qualquer dia e qualquer horário.'],
+              function(){
+                revela(3);paraCrono();limpa();
+                var s=document.createElement('span');s.className='dica';
+                s.textContent='Conversa encerrada. Nenhuma pessoa foi interrompida.';
+                barra.appendChild(s);
+                fecho.classList.add('on');
+              });
+          },700);
+        },500);
+      });
+    },620);
+  }
+
+  /* ================= ATO 2 -- a AiD, de verdade ================= */
+
+  function viraAto2(){
+    fecho.classList.remove('on');
+    crono.classList.add('some');
+    fio.innerHTML='';limpa();hi=0;
+
+    contato.textContent='AiD Negócios';
+    ava.textContent='A';
+    rodape1.textContent='A partir daqui é real. O contato chega no WhatsApp da AiD.';
+
+    painelH.textContent='Agora é de verdade';
+    painelP.textContent='A mesma LAIs que você acabou de ver atende o WhatsApp da AiD. Escolha o dia e o horário — ela prepara a mensagem pra você.';
+    notas.innerHTML=
+      '<div class="nota on"><b>Você não vai preencher formulário</b>'+
+      '<p>Nenhum campo de e-mail, nenhum “aguarde nosso contato”. A conversa termina no WhatsApp, já com tudo escrito.</p></div>'+
+      '<div class="nota on"><b>20 minutos, sem compromisso</b>'+
+      '<p>Uma conversa para entender como é seu atendimento hoje e mostrar o que dá pra automatizar. Se não fizer sentido, você não perde nada.</p></div>';
+
+    setTimeout(b1,500);
+  }
+
+  var diasDisponiveis = [];
+
+  function b1(){
+    marco('agora é real');
+    diasDisponiveis = proximosDias(CONFIG.diasMostrados);
+
+    setTimeout(function(){
+      if (!diasDisponiveis.length){
+        fala(['Oi! Sou a LAIs de verdade agora — atendo o WhatsApp da AiD Negócios.',
+              'No momento não tenho horário aberto por aqui, mas posso te levar direto pra conversa.'],
+          function(){
+            lead.horario = 'a combinar';
+            campo('Seu nome…', b4);
+          });
+        return;
+      }
+
+      var lista = diasDisponiveis.map(function(d,i){
+        return { texto: rotuloDia(d.dia), valor: i };
+      });
+      lista.push({ texto:'Outro dia', valor:'outro', estilo:'fraco' });
+
+      fala(['Oi! Sou a LAIs de verdade agora — atendo o WhatsApp da AiD Negócios.',
+            'Tenho estes dias com vaga pra uma conversa de ' + CONFIG.duracaoMin + ' minutos.',
+            'Qual fica melhor pra você?'],
+        function(){ chips(lista, b2); });
+    },400);
+  }
+
+  function b2(valor, texto){
+    bolha(texto,'voce');
+
+    if (valor === 'outro'){
+      diaEscolhido = null;
+      lead.horario = 'a combinar (nenhum dos dias sugeridos)';
+      setTimeout(function(){
+        fala(['Sem problema — a gente acerta o melhor dia direto na conversa.',
+              'Como devo te chamar?'],
+          function(){ campo('Seu nome…', b4); });
+      },620);
+      return;
+    }
+
+    diaEscolhido = diasDisponiveis[valor];
+    setTimeout(function(){
+      var horas = diaEscolhido.slots.map(function(s){
+        return { texto: s.rotulo, valor: s.rotulo };
+      });
+      fala(['Boa. Nesse dia tenho estes horários livres.'],
+        function(){ chips(horas, b3); });
+    },620);
+  }
+
+  function b3(h){
+    bolha(h,'voce');
+    lead.horario = textoDia(diaEscolhido.dia) + ', às ' + h;
+    setTimeout(function(){
+      fala(['Anotado: ' + lead.horario + '.',
+            'E o seu negócio, é de que tipo?'],
+        function(){ chips(CONFIG.negocios, b3b); });
+    },620);
+  }
+
+  function b3b(n){
+    lead.negocio=n;bolha(n,'voce');
+    setTimeout(function(){
+      fala(['Perfeito. Como devo te chamar?'],
+        function(){campo('Seu nome…',b4);});
+    },620);
+  }
+
+  function b4(n){
+    lead.nome=n;bolha(n,'voce');
+    var p=n.split(' ')[0];
+    if(!lead.negocio) lead.negocio='(não informado)';
+    setTimeout(function(){
+      fala(['Show, '+p+'. Deixei tudo escrito.'],function(){
+        recibo('Sua conversa com a AiD',[
+          ['Nome',lead.nome],['Negócio',lead.negocio],
+          ['Horário',lead.horario],['Duração',CONFIG.duracaoMin+' minutos']
+        ]);
+        setTimeout(function(){
+          fala(['É só tocar no botão abaixo — a mensagem já vai pronta, você só aperta enviar.'],
+            function(){
+              limpa();
+              var b=document.createElement('button');
+              b.className='chip forte';b.type='button';
+              b.textContent='Abrir WhatsApp com tudo preenchido';
+              b.addEventListener('click',abreZap);
+              barra.appendChild(b);
+
+              var s=document.createElement('span');s.className='dica';
+              s.textContent='Você ainda vai poder revisar antes de enviar.';
+              barra.appendChild(s);
+
+              fechoB.textContent='Foi assim que seu paciente vai marcar.';
+              fechoP.textContent='Você acabou de agendar uma reunião sem preencher formulário, sem esperar retorno e sem ninguém do outro lado digitando. É exatamente isso que a LAIs faz pela sua clínica, todos os dias.';
+              acoes.innerHTML='';
+              var z=document.createElement('button');
+              z.className='btn btn-zap';z.textContent='Abrir WhatsApp';
+              z.addEventListener('click',abreZap);
+              var v=document.createElement('button');
+              v.className='btn btn-2';v.textContent='Ver a demonstração de novo';
+              v.addEventListener('click',reinicia);
+              acoes.appendChild(z);acoes.appendChild(v);
+              fecho.classList.add('on');
+            });
+        },700);
+      });
+    },620);
+  }
+
+  function abreZap(){
+    var msg='Oi! Vim pela demonstração da LAIs.\n\n'+
+            'Nome: '+lead.nome+'\n'+
+            'Negócio: '+lead.negocio+'\n'+
+            'Horário escolhido: '+lead.horario+'\n\n'+
+            'Podemos confirmar?';
+    window.open('https://wa.me/'+CONFIG.telefone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+  }
+
+  function reinicia(){ location.reload(); }
+
+  document.getElementById('btn-marcar').addEventListener('click',viraAto2);
+  document.getElementById('btn-de-novo').addEventListener('click',reinicia);
+
+  setTimeout(a1,900);
+})();
+</script>
+</body>
+</html>

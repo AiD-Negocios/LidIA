@@ -313,13 +313,13 @@
   "textos": {
     "titulo":      "{assistente} — agendamento por WhatsApp | {negocio}",
     "chamada":     "Sua secretária dorme.<br><em>A {assistente} não.</em>",
-    "subchamada":  "Este é o WhatsApp da sua clínica às 21h47 de um domingo. Um paciente acabou de mandar mensagem. Continue a conversa e veja o que acontece.",
+    "subchamada":  "Este é o WhatsApp da sua clínica agora, {horaAgora} de {diaSemana}. Um paciente acabou de mandar mensagem. Continue a conversa e veja o que acontece.",
 
     "painelTitulo": "O que acabou de acontecer",
     "painelIntro":  "Cada passo dessa conversa resolve um problema que hoje custa dinheiro à clínica.",
 
     "notas": [
-      { "titulo": "Respondeu em 2 segundos, num domingo à noite",
+      { "titulo": "Respondeu em 2 segundos, {periodo}",
         "texto":  "Fora do horário comercial, a mensagem sem resposta vira ligação pra concorrente. A maioria dos pacientes procura atendimento justamente quando a clínica está fechada." },
       { "titulo": "Ofereceu só horário que existe de verdade",
         "texto":  "Conectada à agenda, a {assistente} nunca oferece um horário já ocupado. Acaba a remarcação constrangedora do dia seguinte." },
@@ -366,7 +366,30 @@
       .replace(/\{assistente\}/g,  CONFIG.assistente)
       .replace(/\{demoNegocio\}/g, DEMO.negocio)
       .replace(/\{negocio\}/g,     CONFIG.negocio)
-      .replace(/\{duracao\}/g,     CONFIG.duracaoMin);
+      .replace(/\{duracao\}/g,     CONFIG.duracaoMin)
+      .replace(/\{horaAgora\}/g,   horaAgora())
+      .replace(/\{diaSemana\}/g,   DIA_LONGO[new Date().getDay()])
+      .replace(/\{periodo\}/g,     periodoDescricao());
+  }
+
+  /* saudacao/periodo/hora reais -- a demo acontece na hora de quem esta vendo,
+     nao mais cravada num "domingo a noite" fixo. */
+  function saudacao(){
+    var h = new Date().getHours();
+    if (h < 12) return 'Bom dia';
+    if (h < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
+  function periodoDescricao(){
+    var h = new Date().getHours();
+    if (h < 6)  return 'de madrugada';
+    if (h < 12) return 'de manhã';
+    if (h < 18) return 'à tarde';
+    return 'à noite';
+  }
+  function horaAgora(){
+    var d = new Date();
+    return d.getHours()+'h'+pad(d.getMinutes());
   }
 
   function poe(id, texto, comHtml){
@@ -387,12 +410,14 @@
       contato=document.getElementById('nome-contato'), ava=document.getElementById('ava'),
       rodape1=document.getElementById('rodape-1'), flutuante=document.getElementById('flutuante');
 
-  var t0=null,tick=null,nome='',hi=0;
+  var t0=null,tick=null,nome='';
   var escolha={servico:'',prof:'',horaLabel:''};
   var diasDisponiveis=[];
 
-  var HORA=['21:47','21:47','21:48','21:48','21:49','21:49','21:50','21:50','21:51','21:51'];
-  function hora(){ return HORA[Math.min(hi++,HORA.length-1)]; }
+  function hora(){
+    var d=new Date();
+    return pad(d.getHours())+':'+pad(d.getMinutes());
+  }
 
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -553,9 +578,9 @@
 
   function a1(){
     comecaCrono();
-    bolha('Oi, boa noite! Queria marcar uma consulta','voce');
+    bolha('Oi, '+saudacao().toLowerCase()+'! Queria marcar uma consulta','voce');
     setTimeout(function(){
-      fala([tpl('Boa noite! Aqui é a {assistente}, assistente da {demoNegocio} 💜'),
+      fala([tpl(saudacao()+'! Aqui é a {assistente}, assistente da {demoNegocio} 💜'),
             'Posso marcar agora mesmo com você. Qual atendimento você procura?'],
         function(){
           revela(0);

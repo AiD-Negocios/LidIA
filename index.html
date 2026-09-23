@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LAIs — agendamento por WhatsApp | AiD Negócios</title>
+<title></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -166,7 +166,7 @@
     body{padding-bottom:78px} /* espaco pro botao flutuante nao cobrir o rodape */
   }
 
-  /* botao flutuante -- so aparece no celular, e so depois do 1o ato terminar */
+  /* botao flutuante -- so aparece no celular, e so depois do agendamento terminar */
   .flutuante{
     display:none;
     position:fixed;left:0;right:0;bottom:0;z-index:40;
@@ -197,9 +197,9 @@
 <body>
 <div class="wrap">
 
-  <div class="marca"><i></i>AiD Negócios</div>
-  <h1>Sua secretária dorme.<br><em>A LAIs não.</em></h1>
-  <p class="sub">Este é o WhatsApp da sua clínica às 21h47 de um domingo. Um paciente acabou de mandar mensagem. Continue a conversa e veja o que acontece.</p>
+  <div class="marca"><i></i><span id="marca-nome"></span></div>
+  <h1 id="chamada"></h1>
+  <p class="sub" id="subchamada"></p>
 
   <div class="crono" id="crono">
     <b id="relogio">0,0s</b><span id="rotulo">desde a primeira mensagem</span>
@@ -208,9 +208,9 @@
   <div class="palco">
     <div class="fone">
       <header>
-        <div class="ava" id="ava">L</div>
+        <div class="ava" id="ava"></div>
         <div class="quem">
-          <b id="nome-contato">Clínica Bem Viver</b>
+          <b id="nome-contato"></b>
           <small>online</small>
         </div>
       </header>
@@ -219,84 +219,184 @@
     </div>
 
     <div class="painel" id="painel">
-      <h2 id="painel-h">O que acabou de acontecer</h2>
-      <p class="intro" id="painel-p">Cada passo dessa conversa resolve um problema que hoje custa dinheiro à clínica.</p>
+      <h2 id="painel-h"></h2>
+      <p class="intro" id="painel-p"></p>
 
-      <div id="notas">
-        <div class="nota" id="n0">
-          <b>Respondeu em 2 segundos, num domingo à noite</b>
-          <p>Fora do horário comercial, a mensagem sem resposta vira ligação pra concorrente. A maioria dos pacientes procura atendimento justamente quando a clínica está fechada.</p>
-        </div>
-        <div class="nota" id="n1">
-          <b>Ofereceu só horário que existe de verdade</b>
-          <p>Conectada à agenda, a LAIs nunca oferece um horário já ocupado. Acaba a remarcação constrangedora do dia seguinte.</p>
-        </div>
-        <div class="nota" id="n2">
-          <b>Fechou sem ninguém digitar nada</b>
-          <p>Nenhuma recepcionista foi interrompida. O agendamento entrou na agenda sozinho, com os dados já certos.</p>
-        </div>
-        <div class="nota" id="n3">
-          <b>Agendou o lembrete de 24h</b>
-          <p>É aqui que o dinheiro aparece. Lembrete automático é o que derruba a falta sem aviso — a maior perda silenciosa de qualquer clínica pequena.</p>
-        </div>
-      </div>
+      <div id="notas"></div>
 
       <div class="fecho" id="fecho">
-        <b id="fecho-b">Foi isso que seu paciente sentiu.</b>
-        <p id="fecho-p">Sem menu de opções, sem “digite 1”, sem esperar o horário comercial. Quer ver funcionando no seu negócio? A própria LAIs marca a conversa.</p>
+        <b id="fecho-b"></b>
+        <p id="fecho-p"></p>
         <div class="acoes" id="fecho-acoes">
-          <button class="btn btn-1" id="btn-marcar">Marcar 20 minutos com a AiD</button>
-          <button class="btn btn-2" id="btn-de-novo">Ver de novo</button>
+          <button class="btn btn-1" id="btn-marcar"></button>
+          <button class="btn btn-2" id="btn-de-novo"></button>
         </div>
       </div>
     </div>
   </div>
 
   <div class="rodape">
-    <span id="rodape-1">Demonstração. Clínica e horários fictícios.</span>
-    <span>AiD Negócios · automação de atendimento</span>
+    <span id="rodape-1"></span>
+    <span id="rodape-2"></span>
   </div>
 </div>
 
 <div class="flutuante" id="flutuante">
-  <button type="button" id="btn-flutuante">Marcar 20 minutos com a AiD</button>
+  <button type="button" id="btn-flutuante"></button>
 </div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ██  INICIO DA ZONA DO CLIENTE  ██
+
+     TUDO que muda de cliente para cliente esta aqui dentro.
+     Do marcador de FIM para baixo e codigo do produto: identico
+     em todos os clientes, e o que voce cola por cima ao atualizar.
+
+     Sao tres blocos:
+
+       "nucleo"  -> COMPARTILHADO com o bot de WhatsApp/API.
+                    Mesmo formato, mesmos nomes de campo. Pode ser
+                    copiado inteiro para o n8n sem mudar nada.
+
+       "demo"    -> so do app: a persona ficticia (a clinica) que
+                    o visitante experimenta como se fosse paciente.
+                    So o NOME da clinica e ficticio -- os horarios
+                    oferecidos vem da agenda real do nucleo.
+
+       "textos"  -> so do app: os textos da pagina.
+                    Curingas aceitos: {assistente} {negocio}
+                    {demoNegocio} {duracao}
+
+     Isto e JSON puro: use aspas duplas em tudo, nao use virgula
+     depois do ultimo item e NAO escreva comentarios aqui dentro.
+     ══════════════════════════════════════════════════════════════════ -->
+<script type="application/json" id="aid-config">
+{
+  "nucleo": {
+    "negocio":    "AiD Negócios",
+    "inicial":    "A",
+    "assistente": "LidIA",
+    "telefone":   "5527988539444",
+
+    "agenda": {
+      "0": [],
+      "1": [["07:00","09:00"],["12:00","14:00"]],
+      "2": [["12:00","14:00"],["17:00","19:00"]],
+      "3": [["07:00","09:00"],["17:00","19:00"]],
+      "4": [["12:00","14:00"]],
+      "5": [["07:00","09:00"]],
+      "6": []
+    },
+
+    "excecoes": ["2026-09-07", "2026-10-12", "2026-11-02", "2026-11-15", "2026-12-25"],
+
+    "duracaoMin":        20,
+    "passoMin":          60,
+    "antecedenciaHoras":  3,
+    "diasMostrados":      3,
+
+    "opcoes": ["Clínica", "Consultório", "Estúdio / bem-estar", "Outro"]
+  },
+
+  "demo": {
+    "negocio":  "Clínica Bem Viver",
+    "inicial":  "L",
+    "endereco": "Av. Nossa Senhora, 120",
+    "servicos": [
+      { "nome": "Fisioterapia", "profissional": "Dra. Marina Alves" },
+      { "nome": "Nutrição",     "profissional": "Dr. Rafael Costa"  },
+      { "nome": "Psicologia",   "profissional": "Dra. Helena Bastos" }
+    ]
+  },
+
+  "textos": {
+    "titulo":      "{assistente} — agendamento por WhatsApp | {negocio}",
+    "chamada":     "Sua secretária dorme.<br><em>A {assistente} não.</em>",
+    "subchamada":  "Este é o WhatsApp da sua clínica agora, {horaAgora} de {diaSemana}. Um paciente acabou de mandar mensagem. Continue a conversa e veja o que acontece.",
+
+    "painelTitulo": "O que acabou de acontecer",
+    "painelIntro":  "Cada passo dessa conversa resolve um problema que hoje custa dinheiro à clínica.",
+
+    "notas": [
+      { "titulo": "Respondeu em 2 segundos, {periodo}",
+        "texto":  "Fora do horário comercial, a mensagem sem resposta vira ligação pra concorrente. A maioria dos pacientes procura atendimento justamente quando a clínica está fechada." },
+      { "titulo": "Ofereceu só horário que existe de verdade",
+        "texto":  "Conectada à agenda, a {assistente} nunca oferece um horário já ocupado. Acaba a remarcação constrangedora do dia seguinte." },
+      { "titulo": "Fechou sem ninguém digitar nada",
+        "texto":  "Nenhuma recepcionista foi interrompida. O agendamento entrou na agenda sozinho, com os dados já certos." },
+      { "titulo": "Agendou o lembrete de 24h",
+        "texto":  "É aqui que o dinheiro aparece. Lembrete automático é o que derruba a falta sem aviso — a maior perda silenciosa de qualquer clínica pequena." }
+    ],
+
+    "fechoTitulo": "Foi isso que seu paciente sentiu.",
+    "fechoTexto":  "Sem menu de opções, sem “digite 1”, sem esperar o horário comercial. Quer ver funcionando no seu negócio? Marque agora, com a própria {assistente}.",
+    "botaoMarcar": "Quero essa automação no meu negócio",
+    "botaoDeNovo": "Ver de novo",
+
+    "rodapeDemo":  "Demonstração. Nome da clínica é fictício — os horários mostrados são reais.",
+    "rodapeMarca": "{negocio} · automação de atendimento"
+  }
+}
+</script>
+<!-- ██  FIM DA ZONA DO CLIENTE  ██
+     Daqui para baixo e codigo do produto. Igual para todo mundo. -->
+
 
 <script>
 (function(){
   "use strict";
 
-  /* =========================================================
-     CONFIGURACAO -- edite so esta parte
-     ========================================================= */
+  /* ============================================================
+     CODIGO DO PRODUTO -- igual para todos os clientes.
+     A configuracao do cliente fica no bloco JSON la em cima
+     (procure por "INICIO DA ZONA DO CLIENTE" no HTML).
+     ============================================================ */
 
-  var CONFIG = {
+  var CFG    = JSON.parse(document.getElementById('aid-config').textContent);
+  var CONFIG = CFG.nucleo;          // apelido curto: nucleo compartilhado
+  var DEMO   = CFG.demo;            // persona ficticia -- so do app
+  var TXT    = CFG.textos;          // textos da pagina -- so do app
 
-    // WhatsApp: pais + DDD + numero, so digitos
-    telefone: "5527988539444",
+  /* Troca os curingas {assistente}, {negocio}, {demoNegocio} e
+     {duracao} pelos valores do nucleo. Assim o texto do produto
+     nunca precisa saber o nome de nenhum cliente. */
+  function tpl(s){
+    return String(s)
+      .replace(/\{assistente\}/g,  CONFIG.assistente)
+      .replace(/\{demoNegocio\}/g, DEMO.negocio)
+      .replace(/\{negocio\}/g,     CONFIG.negocio)
+      .replace(/\{duracao\}/g,     CONFIG.duracaoMin)
+      .replace(/\{horaAgora\}/g,   horaAgora())
+      .replace(/\{diaSemana\}/g,   DIA_LONGO[new Date().getDay()])
+      .replace(/\{periodo\}/g,     periodoDescricao());
+  }
 
-    // Sua agenda real. 0=domingo ... 6=sabado.
-    // Cada par e uma janela ["inicio","fim"] em 24h.
-    // Dia sem janela = fechado.
-    agenda: {
-      0: [],                                    // domingo
-      1: [["07:00","09:00"],["12:00","14:00"]], // segunda
-      2: [["12:00","14:00"],["17:00","19:00"]], // terca
-      3: [["07:00","09:00"],["17:00","19:00"]], // quarta
-      4: [["12:00","14:00"]],                   // quinta
-      5: [["07:00","09:00"]],                   // sexta
-      6: []                                     // sabado
-    },
+  /* saudacao/periodo/hora reais -- a demo acontece na hora de quem esta vendo,
+     nao mais cravada num "domingo a noite" fixo. */
+  function saudacao(){
+    var h = new Date().getHours();
+    if (h < 12) return 'Bom dia';
+    if (h < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
+  function periodoDescricao(){
+    var h = new Date().getHours();
+    if (h < 6)  return 'de madrugada';
+    if (h < 12) return 'de manhã';
+    if (h < 18) return 'à tarde';
+    return 'à noite';
+  }
+  function horaAgora(){
+    var d = new Date();
+    return d.getHours()+'h'+pad(d.getMinutes());
+  }
 
-    duracaoMin:       20,  // duracao da reuniao
-    passoMin:         60,  // de quanto em quanto tempo abre um horario
-    antecedenciaHoras: 3,  // so oferece horario com pelo menos X h de antecedencia
-    diasMostrados:     3,  // quantos dias com vaga aparecem por vez
-
-    negocios: ["Clínica", "Consultório", "Estúdio / bem-estar", "Outro"]
-  };
-
-  /* ========================================================= */
+  function poe(id, texto, comHtml){
+    var e = document.getElementById(id);
+    if (!e || texto === undefined) return;
+    if (comHtml) e.innerHTML = tpl(texto); else e.textContent = tpl(texto);
+  }
 
   var DIA_CURTO = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
   var DIA_LONGO = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
@@ -310,25 +410,33 @@
       contato=document.getElementById('nome-contato'), ava=document.getElementById('ava'),
       rodape1=document.getElementById('rodape-1'), flutuante=document.getElementById('flutuante');
 
-  var t0=null,tick=null,nome='',hi=0;
-  var escolha={servico:'',prof:'',quando:''};
-  var lead={horario:'',negocio:'',nome:''};
-  var diaEscolhido=null;
+  var t0=null,tick=null,nome='';
+  var escolha={servico:'',prof:'',horaLabel:''};
+  var diasDisponiveis=[];
 
-  var HORA=['21:47','21:47','21:48','21:48','21:49','21:49','21:50','21:50','21:51','21:51'];
-  function hora(){ return HORA[Math.min(hi++,HORA.length-1)]; }
+  function hora(){
+    var d=new Date();
+    return pad(d.getHours())+':'+pad(d.getMinutes());
+  }
 
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function desce(){fio.scrollTop=fio.scrollHeight;}
   function pad(n){return (n<10?'0':'')+n;}
 
-  /* ---------- motor de agenda ---------- */
+  /* ---------- motor de agenda (real, compartilhado com o bot) ---------- */
 
   function paraMin(hhmm){var p=hhmm.split(':');return (+p[0])*60 + (+p[1]);}
   function deMin(m){return pad(Math.floor(m/60))+':'+pad(m%60);}
 
+  function iso(d){
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  }
+
   function slotsDoDia(dia){
+    /* dia bloqueado (feriado, ferias, congresso) nao gera horario nenhum */
+    if ((CONFIG.excecoes || []).indexOf(iso(dia)) !== -1) return [];
+
     var janelas = CONFIG.agenda[dia.getDay()] || [];
     var limite = new Date(Date.now() + CONFIG.antecedenciaHoras*3600000);
     var out = [];
@@ -365,14 +473,39 @@
     return DIA_LONGO[dia.getDay()] + ', ' + pad(dia.getDate()) + '/' + pad(dia.getMonth()+1);
   }
 
+  /* ---------- pinta a pagina a partir da zona do cliente ---------- */
+
+  function pintaPagina(){
+    document.title = tpl(TXT.titulo);
+    poe('marca-nome',  CONFIG.negocio);
+    poe('chamada',     TXT.chamada, true);
+    poe('subchamada',  TXT.subchamada);
+
+    poe('nome-contato', DEMO.negocio);
+    poe('ava',          DEMO.inicial);
+
+    poe('painel-h', TXT.painelTitulo);
+    poe('painel-p', TXT.painelIntro);
+
+    notas.innerHTML = (TXT.notas || []).map(function(n,i){
+      return '<div class="nota" id="n'+i+'"><b>'+esc(tpl(n.titulo))+'</b>'+
+             '<p>'+esc(tpl(n.texto))+'</p></div>';
+    }).join('');
+
+    poe('fecho-b',       TXT.fechoTitulo);
+    poe('fecho-p',       TXT.fechoTexto);
+    poe('btn-marcar',    TXT.botaoMarcar);
+    poe('btn-de-novo',   TXT.botaoDeNovo);
+    poe('btn-flutuante', TXT.botaoMarcar);
+    poe('rodape-1',      TXT.rodapeDemo);
+    poe('rodape-2',      TXT.rodapeMarca);
+  }
+
   /* ---------- primitivas de conversa ---------- */
 
   function bolha(t,q){var d=document.createElement('div');d.className='msg '+q;
     d.innerHTML=esc(t).replace(/\n/g,'<br>')+'<time>'+hora()+'</time>';
     fio.appendChild(d);desce();}
-
-  function marco(t){var d=document.createElement('div');d.className='marco';
-    d.textContent=t;fio.appendChild(d);desce();}
 
   function digitando(){var d=document.createElement('div');d.className='digita';
     d.innerHTML='<i></i><i></i><i></i>';fio.appendChild(d);desce();return d;}
@@ -438,39 +571,70 @@
     rotulo.textContent='do "oi" até o agendamento confirmado';
   }
 
-  /* ================= ATO 1 -- a clinica ================= */
+  /* ================= ciclo único: a persona da clínica, com agenda real ================= */
 
-  var PROF={'Fisioterapia':'Dra. Marina Alves','Nutrição':'Dr. Rafael Costa','Psicologia':'Dra. Helena Bastos'};
+  var PROF={};
+  (DEMO.servicos||[]).forEach(function(s){ PROF[s.nome]=s.profissional; });
 
   function a1(){
     comecaCrono();
-    bolha('Oi, boa noite! Queria marcar uma consulta','voce');
+    bolha('Oi, '+saudacao().toLowerCase()+'! Queria marcar uma consulta','voce');
     setTimeout(function(){
-      fala(['Boa noite! Aqui é a LAIs, assistente da Clínica Bem Viver 💜',
+      fala([tpl(saudacao()+'! Aqui é a {assistente}, assistente da {demoNegocio} 💜'),
             'Posso marcar agora mesmo com você. Qual atendimento você procura?'],
-        function(){revela(0);chips(['Fisioterapia','Nutrição','Psicologia'],a2);});
+        function(){
+          revela(0);
+          chips((DEMO.servicos||[]).map(function(s){return s.nome;}),a2);
+        });
     },700);
   }
 
   function a2(s){
     escolha.servico=s;escolha.prof=PROF[s];
     bolha(s,'voce');
+    diasDisponiveis = proximosDias(CONFIG.diasMostrados);
+
     setTimeout(function(){
+      if (!diasDisponiveis.length){
+        fala(['Ótimo. '+escolha.prof+' atende '+s.toLowerCase()+'.',
+              'No momento não tenho horário aberto por aqui, mas posso te levar direto pra conversa.'],
+          function(){
+            escolha.horaLabel = 'a combinar';
+            revela(1);
+            campo('Digite seu nome…',a4);
+          });
+        return;
+      }
+
+      var lista = diasDisponiveis.map(function(d,i){
+        return { texto: rotuloDia(d.dia), valor: i };
+      });
+
       fala(['Ótimo. '+escolha.prof+' atende '+s.toLowerCase()+' e ainda tem horário essa semana.',
-            'Estes estão livres. Qual fica melhor pra você?'],
-        function(){revela(1);chips(['Terça, 14h','Quarta, 9h30','Quinta, 16h'],a3);});
+            'Qual dia fica melhor pra você?'],
+        function(){ chips(lista, a2b); });
     },620);
   }
 
-  function a3(q){
-    if(q.indexOf('Quarta')===0) escolha.quando='Quarta-feira, 9h30 · 13 de agosto';
-    else if(q.indexOf('Quinta')===0) escolha.quando='Quinta-feira, 16h · 14 de agosto';
-    else escolha.quando='Terça-feira, 14h · 12 de agosto';
-    bolha(q,'voce');
+  function a2b(valor,texto){
+    bolha(texto,'voce');
+    var dia = diasDisponiveis[valor];
     setTimeout(function(){
-      fala(['Reservei esse horário pra você por 10 minutos.',
+      var horas = dia.slots.map(function(s){
+        return { texto: s.rotulo, valor: { dia:dia, hora:s.rotulo } };
+      });
+      fala(['Nesse dia, estes horários estão livres.'],
+        function(){ chips(horas, a3); });
+    },620);
+  }
+
+  function a3(valor,texto){
+    bolha(texto,'voce');
+    escolha.horaLabel = textoDia(valor.dia.dia) + ', às ' + valor.hora;
+    setTimeout(function(){
+      fala([tpl('Reservei esse horário pra você por {duracao} minutos.'),
             'Só preciso do seu nome completo pra confirmar.'],
-        function(){campo('Digite seu nome…',a4);});
+        function(){ revela(1); campo('Digite seu nome…',a4); });
     },620);
   }
 
@@ -483,8 +647,8 @@
         setTimeout(function(){
           recibo('Comprovante de agendamento',[
             ['Paciente',nome],['Atendimento',escolha.servico],
-            ['Profissional',escolha.prof],['Data',escolha.quando],
-            ['Endereço','Av. Nossa Senhora, 120']
+            ['Profissional',escolha.prof],['Data',escolha.horaLabel],
+            ['Endereço',DEMO.endereco]
           ]);
           setTimeout(function(){
             fala(['Vou te mandar um lembrete 24h antes.',
@@ -503,156 +667,21 @@
     },620);
   }
 
-  /* ================= ATO 2 -- a AiD, de verdade ================= */
-
-  function viraAto2(){
-    fecho.classList.remove('on');
-    flutuante.classList.remove('on');
-    crono.classList.add('some');
-    fio.innerHTML='';limpa();hi=0;
-
-    contato.textContent='AiD Negócios';
-    ava.textContent='A';
-    rodape1.textContent='A partir daqui é real. O contato chega no WhatsApp da AiD.';
-
-    painelH.textContent='Agora é de verdade';
-    painelP.textContent='A mesma LAIs que você acabou de ver atende o WhatsApp da AiD. Escolha o dia e o horário — ela prepara a mensagem pra você.';
-    notas.innerHTML=
-      '<div class="nota on"><b>Você não vai preencher formulário</b>'+
-      '<p>Nenhum campo de e-mail, nenhum “aguarde nosso contato”. A conversa termina no WhatsApp, já com tudo escrito.</p></div>'+
-      '<div class="nota on"><b>20 minutos, sem compromisso</b>'+
-      '<p>Uma conversa para entender como é seu atendimento hoje e mostrar o que dá pra automatizar. Se não fizer sentido, você não perde nada.</p></div>';
-
-    setTimeout(b1,500);
-  }
-
-  var diasDisponiveis = [];
-
-  function b1(){
-    marco('agora é real');
-    diasDisponiveis = proximosDias(CONFIG.diasMostrados);
-
-    setTimeout(function(){
-      if (!diasDisponiveis.length){
-        fala(['Oi! Sou a LAIs de verdade agora — atendo o WhatsApp da AiD Negócios.',
-              'No momento não tenho horário aberto por aqui, mas posso te levar direto pra conversa.'],
-          function(){
-            lead.horario = 'a combinar';
-            campo('Seu nome…', b4);
-          });
-        return;
-      }
-
-      var lista = diasDisponiveis.map(function(d,i){
-        return { texto: rotuloDia(d.dia), valor: i };
-      });
-      lista.push({ texto:'Outro dia', valor:'outro', estilo:'fraco' });
-
-      fala(['Oi! Sou a LAIs de verdade agora — atendo o WhatsApp da AiD Negócios.',
-            'Tenho estes dias com vaga pra uma conversa de ' + CONFIG.duracaoMin + ' minutos.',
-            'Qual fica melhor pra você?'],
-        function(){ chips(lista, b2); });
-    },400);
-  }
-
-  function b2(valor, texto){
-    bolha(texto,'voce');
-
-    if (valor === 'outro'){
-      diaEscolhido = null;
-      lead.horario = 'a combinar (nenhum dos dias sugeridos)';
-      setTimeout(function(){
-        fala(['Sem problema — a gente acerta o melhor dia direto na conversa.',
-              'Como devo te chamar?'],
-          function(){ campo('Seu nome…', b4); });
-      },620);
-      return;
-    }
-
-    diaEscolhido = diasDisponiveis[valor];
-    setTimeout(function(){
-      var horas = diaEscolhido.slots.map(function(s){
-        return { texto: s.rotulo, valor: s.rotulo };
-      });
-      fala(['Boa. Nesse dia tenho estes horários livres.'],
-        function(){ chips(horas, b3); });
-    },620);
-  }
-
-  function b3(h){
-    bolha(h,'voce');
-    lead.horario = textoDia(diaEscolhido.dia) + ', às ' + h;
-    setTimeout(function(){
-      fala(['Anotado: ' + lead.horario + '.',
-            'E o seu negócio, é de que tipo?'],
-        function(){ chips(CONFIG.negocios, b3b); });
-    },620);
-  }
-
-  function b3b(n){
-    lead.negocio=n;bolha(n,'voce');
-    setTimeout(function(){
-      fala(['Perfeito. Como devo te chamar?'],
-        function(){campo('Seu nome…',b4);});
-    },620);
-  }
-
-  function b4(n){
-    lead.nome=n;bolha(n,'voce');
-    var p=n.split(' ')[0];
-    if(!lead.negocio) lead.negocio='(não informado)';
-    setTimeout(function(){
-      fala(['Show, '+p+'. Deixei tudo escrito.'],function(){
-        recibo('Sua conversa com a AiD',[
-          ['Nome',lead.nome],['Negócio',lead.negocio],
-          ['Horário',lead.horario],['Duração',CONFIG.duracaoMin+' minutos']
-        ]);
-        setTimeout(function(){
-          fala(['É só tocar no botão abaixo — a mensagem já vai pronta, você só aperta enviar.'],
-            function(){
-              limpa();
-              var b=document.createElement('button');
-              b.className='chip forte';b.type='button';
-              b.textContent='Abrir WhatsApp com tudo preenchido';
-              b.addEventListener('click',abreZap);
-              barra.appendChild(b);
-
-              var s=document.createElement('span');s.className='dica';
-              s.textContent='Você ainda vai poder revisar antes de enviar.';
-              barra.appendChild(s);
-
-              fechoB.textContent='Foi assim que seu paciente vai marcar.';
-              fechoP.textContent='Você acabou de agendar uma reunião sem preencher formulário, sem esperar retorno e sem ninguém do outro lado digitando. É exatamente isso que a LAIs faz pela sua clínica, todos os dias.';
-              acoes.innerHTML='';
-              var z=document.createElement('button');
-              z.className='btn btn-zap';z.textContent='Abrir WhatsApp';
-              z.addEventListener('click',abreZap);
-              var v=document.createElement('button');
-              v.className='btn btn-2';v.textContent='Ver a demonstração de novo';
-              v.addEventListener('click',reinicia);
-              acoes.appendChild(z);acoes.appendChild(v);
-              fecho.classList.add('on');
-            });
-        },700);
-      });
-    },620);
-  }
-
   function abreZap(){
-    var msg='Oi! Vim pela demonstração da LAIs.\n\n'+
-            'Nome: '+lead.nome+'\n'+
-            'Negócio: '+lead.negocio+'\n'+
-            'Horário escolhido: '+lead.horario+'\n\n'+
+    var msg=tpl('Oi! Vim pela demonstração da {assistente}.')+'\n\n'+
+            'Nome: '+nome+'\n'+
+            'Horário escolhido: '+escolha.horaLabel+'\n\n'+
             'Podemos confirmar?';
     window.open('https://wa.me/'+CONFIG.telefone+'?text='+encodeURIComponent(msg),'_blank','noopener');
   }
 
   function reinicia(){ location.reload(); }
 
-  document.getElementById('btn-marcar').addEventListener('click',viraAto2);
-  document.getElementById('btn-flutuante').addEventListener('click',viraAto2);
+  document.getElementById('btn-marcar').addEventListener('click',abreZap);
+  document.getElementById('btn-flutuante').addEventListener('click',abreZap);
   document.getElementById('btn-de-novo').addEventListener('click',reinicia);
 
+  pintaPagina();
   setTimeout(a1,900);
 })();
 </script>
